@@ -1,0 +1,54 @@
+import requests
+import pickle
+from selenium import webdriver
+from bs4 import BeautifulSoup
+import re
+import time
+import threading
+
+
+data = []
+error = []
+
+with open('./data.pkl', 'rb') as f:
+    info = pickle.load(f)
+
+
+def parse(url, number):
+    text = requests.get(url=url)
+    res = BeautifulSoup(text.content, 'lxml')
+    print(res.select('span[class="nums"]')[0].contents[0])
+    aa = re.sub('\D', '', res.select('span[class="nums"]')[0].contents[0])
+    out = {'id':number, 'number':aa}
+    with open('ted.txt', 'a+') as f:
+        f.write(out)
+    data.append(out)
+
+
+for i in info:
+    try:
+        driver = webdriver.Chrome()
+        driver.get('http://news.baidu.com/z/resource/pc/staticpage/advanced_news.html')
+        driver.find_element_by_name('q1').send_keys(i[1])
+        driver.find_element_by_name('begin_date').clear()
+        driver.find_element_by_name('begin_date').send_keys(i[2][0][0:4] + '-' + i[2][0][-2:] + '-' + i[2][0][5:7])
+        driver.find_element_by_name('end_date').clear()
+        driver.find_element_by_name('end_date').send_keys(i[2][1][0:4] + '-' + i[2][1][-2:] + '-' + i[2][1][5:7])
+        driver.find_element_by_xpath('//*[@id="f"]/table/tbody/tr/td/table/tbody/tr[3]/td/table/tbody/tr[2]/td[3]/input[1]').click()
+        driver.find_element_by_xpath('//*[@id="newstitledy"]').click()
+        driver.find_element_by_name('submit').click()
+    except:
+        print('ËÑË÷´íÎó')
+        error.append(i[0])
+    try:
+        parse(driver.current_url, i[0])
+    except BaseException:
+        error.append(i[0])
+    driver.quit()
+    print(i)
+
+with open('ok.pkl', 'wb') as f:
+    pickle.dump(data, f)
+
+with open('error.pkl', 'wb') as f:
+    pickle.dump(error, f)
