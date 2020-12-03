@@ -14,23 +14,23 @@ from tqdm import tqdm
 import argparse
 
 # run command
-# python gen_result.py -d data/raw.txt -s data/tmp.csv -m models/roberta.pt -t /data0/zhouyue/ted/data/cache/roberta/
+# python gen_result.py
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-d", "--path1", nargs='?', const=1, type=str, default="data/test",
+parser.add_argument("-d", "--path1", nargs='?', const=1, type=str, default="/home/lupinsu001/data/classification/test",
                         help="test path load")
-parser.add_argument("-s", "--path2", nargs='?', const=1, type=str, default="data/result.csv",
+parser.add_argument("-s", "--path2", nargs='?', const=1, type=str, default="/home/lupinsu001/data/result/result.csv",
                         help="data path save")
 parser.add_argument("-g", "--gpu", nargs='?', const=1, type=int, default=0,
                         help="model path save")
 parser.add_argument("-bs", "--bach_size", nargs='?', const=1, type=int, default=256,
                         help="epoch num")
-parser.add_argument("-t", "--tokenizer", nargs='?', const=1, type=str, default="/data0/zhouyue/ted/data/cache/roberta/",
+parser.add_argument("-t", "--tokenizer", nargs='?', const=1, type=str, default="/home/lupinsu001/cache/roberta/",
                         help="tokenizer path load")
-parser.add_argument("-m", "--pre_train_model", nargs='?', const=1, type=str, default="/data0/zhouyue/ted/data/cache/roberta/",
+parser.add_argument("-m", "--pre_train_model", nargs='?', const=1, type=str, default="/home/lupinsu001/data/models/roberta_0.pt",
                         help="pre_trained model path load")
-parser.add_argument("-l", "--label_path", nargs='?', const=1, type=str, default="label_save",
+parser.add_argument("-l", "--label_path", nargs='?', const=1, type=str,default="/home/lupinsu001/data/classification/label_save",
                         help="label path load")
 args = parser.parse_args()
 
@@ -41,7 +41,7 @@ df_test = pd.read_csv(args.path1, sep='\t', header=None)
 test_x= df_test.iloc[:,0].tolist()
 
 # label load
-with open('label_save', 'r') as f:
+with open(args.label_path, 'r') as f:
     labels = f.read().split()
 
 label2id = {}

@@ -15,23 +15,23 @@ from tqdm import tqdm
 import argparse
 
 # run command
-# python bert_evaluate.py -d data/test.csv -s data/tmp.csv -m models/roberta.pt -t /data0/zhouyue/ted/data/cache/roberta/
+# python bert_evaluate.py
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-d", "--path1", nargs='?', const=1, type=str, default="data/test",
+parser.add_argument("-d", "--path1", nargs='?', const=1, type=str, default="/home/lupinsu001/data/classification/test",
                         help="test path load")
-parser.add_argument("-s", "--path2", nargs='?', const=1, type=str, default="data/result.csv",
+parser.add_argument("-s", "--path2", nargs='?', const=1, type=str, default="/home/lupinsu001/data/report/re1",
                         help="data path save")
 parser.add_argument("-g", "--gpu", nargs='?', const=1, type=int, default=0,
                         help="model path save")
 parser.add_argument("-bs", "--bach_size", nargs='?', const=1, type=int, default=256,
                         help="epoch num")
-parser.add_argument("-t", "--tokenizer", nargs='?', const=1, type=str, default="/data0/zhouyue/ted/data/cache/roberta/",
+parser.add_argument("-t", "--tokenizer", nargs='?', const=1, type=str, default="/home/lupinsu001/cache/roberta/",
                         help="tokenizer path load")
-parser.add_argument("-m", "--pre_train_model", nargs='?', const=1, type=str, default="/data0/zhouyue/ted/data/cache/roberta/",
+parser.add_argument("-m", "--pre_train_model", nargs='?', const=1, type=str, default="/home/lupinsu001/data/models/roberta_0.pt",
                         help="pre_trained model path load")
-parser.add_argument("-l", "--label_path", nargs='?', const=1, type=str, default="label_save",
+parser.add_argument("-l", "--label_path", nargs='?', const=1, type=str,default="/home/lupinsu001/data/classification/label_save",
                         help="label path load")
 args = parser.parse_args()
 
@@ -42,11 +42,11 @@ df_test = pd.read_csv(args.path1, sep='\t', header=None)
 test_x, test_y = df_test.iloc[:,0].tolist(), df_test.iloc[:,1].tolist()
 
 # label load
-if os.path.exists('label_save'):
-    with open('label_save', 'r') as f:
+if os.path.exists(args.label_path):
+    with open(args.label_path, 'r') as f:
         labels = f.read().split()
 else:
-    labels = set(train_y)|set(test_y)
+    labels = set(test_x)|set(test_y)
 
 label2id = {}
 id2label = {}
@@ -137,5 +137,4 @@ df = pd.DataFrame()
 df['msg']=test_x
 df['y_real']=y_real
 df['y_pred']=y_pred
-df['test_y']=test_y
 df.to_csv(args.path2, index=False, sep='\t')

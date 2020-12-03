@@ -22,13 +22,13 @@ parser.add_argument("-d1", "--path1", nargs='?', const=1, type=str, default="/ho
                         help="train path load")
 parser.add_argument("-d2", "--path2", nargs='?', const=1, type=str, default="/home/lupinsu001/data/classification/test",
                         help="test path load")
-parser.add_argument("-token", "--token_path", nargs='?', const=1, type=str, default="bert-base-chinese",
+parser.add_argument("-token", "--token_path", nargs='?', const=1, type=str, default="/home/lupinsu001/cache/roberta/",
                         help="model path load")
-parser.add_argument("-m", "--path3", nargs='?', const=1, type=str, default="/home/lupinsu001/EsperBERTo/checkpoint-150000/",
+parser.add_argument("-m", "--path3", nargs='?', const=1, type=str, default="/home/lupinsu001/cache/roberta/",
                         help="model path load")
-parser.add_argument("-s", "--path4", nargs='?', const=1, type=str, default="/home/lupinsu001/EsperBERTo/model_tmp.pt",
+parser.add_argument("-s", "--path4", nargs='?', const=1, type=str, default="/home/lupinsu001/data/models/model_tmp.pt",
                         help="model path save")
-parser.add_argument("-label", "--label_path", nargs='?', const=1, type=str, default="label_save",
+parser.add_argument("-label", "--label_path", nargs='?', const=1, type=str,  default="/home/lupinsu001/data/classification/label_save",
                         help="model path save")
 parser.add_argument("-g", "--gpu", nargs='?', const=1, type=int, default=0,
                         help="model path save")

@@ -3,6 +3,7 @@ from transformers import *
 from typing import Dict, List, Optional
 from torch.utils.data import Dataset
 import torch
+from torch.nn import CrossEntropyLoss
 import os
 import argparse
 
@@ -24,6 +25,23 @@ parser.add_argument("-g", "--gpu", nargs='?', const=1, type=int, default=0,
                         help="model path save")
 args = parser.parse_args()
 
+
+class MyDataset(Data.Dataset):
+    def __init__(self,filepath, tokenizer):
+        number = 0
+        with open(filepath,"r") as f:
+            # 获得训练数据的总行数
+            for _ in tqdm(f,desc="load training dataset"):
+                number+=1
+        self.number = number
+        self.fopen = open(filepath,'r')
+        self.tokenizer = tokenizer
+    def __len__(self):
+        return self.number
+    def __getitem__(self,index):
+        line = self.fopen.__next__()
+        data = self.tokenizer(line, truncation=True, padding='max_length', max_length=32, return_tensors='pt')
+        return {'input_ids':data['input_ids'].squeeze()}
 
 class Raw_data_load(Dataset):
     def __init__(self, tokenizer: PreTrainedTokenizer, file_path: str, block_size: int):
@@ -95,7 +113,6 @@ data_collator = DataCollatorForLanguageModeling(
     tokenizer=tokenizer, mlm=True, mlm_probability=0.15
 )
 
-# from transformers import Trainer, TrainingArguments
 
 training_args = TrainingArguments(
     output_dir="./EsperBERTo",
