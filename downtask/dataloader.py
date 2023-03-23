@@ -26,7 +26,7 @@ class CustomDataset(Dataset):
         return batch
 
 def parse_data(config):
-    df = pd.read_csv(config.path, sep='\t')
+    df = pd.read_csv(config.df_file, sep='\t')
     label_names = df.columns.values.tolist()[1:]
     
     num=int(len(df)*0.8)

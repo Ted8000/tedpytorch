@@ -18,7 +18,8 @@ class Trainer:
     def __init__(self, config):
         self.config = config
         num_labels = len(config.id2label)
-        self.model  = get_model(config.path, num_labels)
+        self.model  = get_model(config.model_load_path, num_labels)
+        self.model.to(device)
         
         self.criterion_ce = nn.CrossEntropyLoss()
         self.criterion_kl = nn.KLDivLoss(reduction="batchmean")

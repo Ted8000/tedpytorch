@@ -4,7 +4,7 @@ from transformers.modeling_outputs import  TokenClassifierOutput
 from torch import nn
 from torch.nn import CrossEntropyLoss
 import torch
-from torchcrf import CRF
+from TorchCRF import CRF
 import logging
 
 logging.basicConfig(format='%(asctime)s - %(message)s', filename='log', filemode='a', level=logging.DEBUG)
