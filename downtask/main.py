@@ -1,17 +1,15 @@
 import os
-import logging
 import argparse
 import numpy as np
 
 from model import get_model
 from dataloader import parse_data
+from utils import get_logger
 
 import torch
 import torch.nn as nn
 from torch.optim import AdamW
 import torch.nn.functional as F
-
-logging.basicConfig(format='%(asctime)s - %(message)s', filename='log', filemode='a', level=logging.DEBUG)
 
 
 class Trainer:
@@ -90,7 +88,7 @@ class Trainer:
                     self.save(self.model, config.model_save_path)
                     best_acc = now_acc
                 print('Accuracy of the network on the dev data: {} %'.format(100 * correct / total))
-        logging.info('Model best accuracy is {} %'.format(best_acc))
+        logger.info('Model best accuracy is {} %'.format(best_acc))
     
     def test(self, test_loader):
         best_acc = 0
@@ -112,7 +110,7 @@ class Trainer:
                 self.save(self.model, './data/teacher_model.pt')
                 best_acc = now_acc
             print('Accuracy of the network on the dev data: {} %'.format(100 * correct / total))
-        logging.info('Model test accuracy is {} %'.format(best_acc))    
+        logger.info('Model test accuracy is {} %'.format(best_acc))    
 
     def predict(self, data_loader):
         """
@@ -129,7 +127,7 @@ class Trainer:
                 outputs = self.model(input_ids, attention_mask)
                 _, predicted = torch.max(outputs[0].data, 1)
 
-        logging.info('Model predict finished')   
+        logger.info('Model predict finished')   
     
     def load(self, path):
         return torch.load(path)
@@ -172,6 +170,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     config = args
+    logger = get_logger()
     
     os.environ["TOKENIZERS_PARALLELISM"] = "false"
     device = torch.device('cuda:{}'.format(config.gpu) if torch.cuda.is_available() else 'cpu')
@@ -184,5 +183,5 @@ if __name__ == '__main__':
     trainer = Trainer(config)
     trainer.train(train_loader, dev_loader)
     
-    logging.info('Finished')
+    logger.info('Finished')
     

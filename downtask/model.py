@@ -5,9 +5,8 @@ from torch import nn
 from torch.nn import CrossEntropyLoss
 import torch
 from TorchCRF import CRF
-import logging
+from utils import get_logger
 
-logging.basicConfig(format='%(asctime)s - %(message)s', filename='log', filemode='a', level=logging.DEBUG)
 
 def get_model(path="xlm-roberta-base", num_labels=2):
     classify_model = AutoModelForSequenceClassification.from_pretrained(path, num_labels=num_labels)

@@ -6,7 +6,7 @@ import pandas as pd
 from sklearn.utils import shuffle
 import logging
 
-logging.basicConfig(format='%(asctime)s - %(message)s', filename='log', filemode='a', level=logging.DEBUG)
+logging.basicConfig(format='%(asctime)s - %(message)s', filename='log', filemode='a', level=logging.INFO)
 
 class CustomDataset(Dataset):
     def __init__(self, df, label2id, length, tok):
