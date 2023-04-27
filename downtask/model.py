@@ -5,12 +5,6 @@ from torch import nn
 from torch.nn import CrossEntropyLoss
 import torch
 from TorchCRF import CRF
-from utils import get_logger
-
-
-def get_model(path="xlm-roberta-base", num_labels=2):
-    classify_model = AutoModelForSequenceClassification.from_pretrained(path, num_labels=num_labels)
-    return classify_model
 
 
 class BertForTokenClassification(BertPreTrainedModel):
@@ -97,8 +91,8 @@ class BertLstmCRF(BertPreTrainedModel):
     def __init__(self, config):
         super().__init__(config)
         self.num_labels = config.num_labels
-
-        self.bert = BertModel(config, add_pooling_layer=False)
+        self.bert = AutoModel.from_config(config, add_pooling_layer=False)
+        # self.bert = AutoModel(config, add_pooling_layer=False)
         self.dropout = nn.Dropout(config.hidden_dropout_prob)
         self.bilstm = nn.LSTM(config.hidden_size, (config.hidden_size) // 2, dropout=config.dropout, batch_first=True,
                               bidirectional=True)
@@ -220,3 +214,12 @@ class BertCRF(BertPreTrainedModel):
             return ((loss,) + output) if loss is not None else output
 
         return loss, tags
+    
+def get_model(config):
+    if config.task == 'cls':
+        classify_model = AutoModelForSequenceClassification.from_pretrained(config.model_load_path, num_labels=config.num_labels)
+    if config.task == 'ner':
+        classify_model = BertLstmCRF.from_pretrained(config.model_load_path, num_labels=config.num_labels)
+    if config.task == 'w2ner':
+        pass
+    return classify_model

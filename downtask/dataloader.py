@@ -1,4 +1,5 @@
 import torch
+from datasets import Dataset
 from transformers import AutoTokenizer
 from sklearn.preprocessing import LabelEncoder
 from torch.utils.data import dataloader, Dataset, dataset, DataLoader
@@ -53,3 +54,40 @@ def parse_data(config):
     test_loader = DataLoader(test_set, batch_size=config.batch_size, shuffle=True, num_workers=4)
     
     return train_loader, dev_loader, test_loader, id2label, label2id
+
+# def tokenize_and_align_labels(examples):
+#     tokenized_inputs = tokenizer(list(map(lambda x:eval(x), examples["tokens"])), truncation=True, is_split_into_words=True)
+    
+#     labels = []
+#     for i, label in enumerate(list(map(lambda x:eval(x), examples["ner_tags"]))):
+#         word_ids = tokenized_inputs.word_ids(batch_index=i)
+#         previous_word_idx = None
+#         label_ids = []
+#         for word_idx in word_ids:
+#             # Special tokens have a word id that is None. We set the label to -100 so they are automatically
+#             # ignored in the loss function.
+#             if word_idx is None:
+#                 label_ids.append(-100)
+#             # We set the label for the first token of each word.
+#             elif word_idx != previous_word_idx:
+#                 label_ids.append(label[word_idx])
+#             # For the other tokens in a word, we set the label to either the current label or -100, depending on
+#             # the label_all_tokens flag.
+#             else:
+#                 label_ids.append(label[word_idx] if label_all_tokens else -100)
+#             previous_word_idx = word_idx
+
+#         labels.append(label_ids)
+
+#     tokenized_inputs["labels"] = labels
+#     return tokenized_inputs
+
+# def parse_ner(config):
+#     data = Dataset.from_csv(config.df_file)
+#     train_tokenized = data.map(tokenize_and_align_labels, batched=True)
+
+#     d_tmp = train_tokenized.train_test_split(0.2)
+#     train = d_tmp['train']
+#     test = d_tmp['test']
+
+#     return train, test

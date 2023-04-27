@@ -15,8 +15,8 @@ import torch.nn.functional as F
 class Trainer:
     def __init__(self, config):
         self.config = config
-        num_labels = len(config.id2label)
-        self.model  = get_model(config.model_load_path, num_labels)
+        config.num_labels = len(config.id2label)
+        self.model  = get_model(config)
         self.model.to(device)
         
         self.criterion_ce = nn.CrossEntropyLoss()
@@ -88,7 +88,7 @@ class Trainer:
                     self.save(self.model, config.model_save_path)
                     best_acc = now_acc
                 print('Accuracy of the network on the dev data: {} %'.format(100 * correct / total))
-        logger.info('Model best accuracy is {} %'.format(best_acc))
+        logger.info('{} best with para lr {}, bs {}, the accuracy is {} %'.format(config.model_load_path, config.learning_rate, config.batch_size, best_acc))
     
     def test(self, test_loader):
         best_acc = 0
@@ -153,13 +153,13 @@ if __name__ == '__main__':
                             help="train batch size num")
     parser.add_argument("-g", "--gpu", nargs='?', const=1, type=int, default=0,
                             help="gpu device")
-    parser.add_argument("-lr", "--learning_rate", nargs='?', const=1, type=int, default=3e-5,
+    parser.add_argument("-lr", "--learning_rate", nargs='?', const=1, type=float, default=3e-5,
                             help="learn rate")
     parser.add_argument("-eps","--adam_epsilon", default=1e-8, type=float)
     parser.add_argument("--max_grad_norm", default=1.0, type=float)
     parser.add_argument('--gradient_accumulation_steps', type=int, default=1)
     parser.add_argument("--warmup_ratio", default=0.1, type=float)
-    parser.add_argument("--log_path", default='./log_all', type=str)
+    parser.add_argument("--log_path", default='./log', type=str)
     parser.add_argument("--config_path", default=None, type=str)
     parser.add_argument("--df_file", default=None, type=str)
     parser.add_argument("--task", default="cls", type=str)
@@ -168,8 +168,7 @@ if __name__ == '__main__':
     parser.add_argument('--seed', default=42, type=int) 
     parser.add_argument('--path', default=None, type=str)
 
-    args = parser.parse_args()
-    config = args
+    config = parser.parse_args()
     logger = get_logger()
     
     os.environ["TOKENIZERS_PARALLELISM"] = "false"
@@ -179,9 +178,8 @@ if __name__ == '__main__':
 
     config.id2label = id2label
     config.label2id = label2id
+    config.learning_rate = float(config.learning_rate)
 
     trainer = Trainer(config)
     trainer.train(train_loader, dev_loader)
-    
-    logger.info('Finished')
     

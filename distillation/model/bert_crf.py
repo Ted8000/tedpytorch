@@ -3,7 +3,7 @@ from transformers.modeling_outputs import  TokenClassifierOutput
 from torch import nn
 from torch.nn import CrossEntropyLoss
 import torch
-from torchcrf import CRF
+from TorchCRF import CRF
 
 
 class BertForTokenClassification(BertPreTrainedModel):
