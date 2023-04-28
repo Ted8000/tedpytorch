@@ -3,6 +3,7 @@ import argparse
 import time
 import pandas as pd
 import numpy as np
+from sklearn.metrics import classification_report
 
 from model import get_model
 from dataloader import parse_data
@@ -12,12 +13,16 @@ import torch
 import torch.nn as nn
 from torch.optim import AdamW
 import torch.nn.functional as F
+from huggingface_hub import login
+import sys
+sys.path.append('/home/work/lupinsu/hub/lps/tools/')
+from send_email import send_email
 
 
 class Trainer:
     def __init__(self, config):
         self.config = config
-        config.num_labels = len(config.id2label)
+        self.config.num_labels = len(config.id2label)
         self.model  = get_model(config)
         self.model.to(device)
         
@@ -87,32 +92,36 @@ class Trainer:
 
                 now_acc = 100 * correct / total
                 if now_acc > best_acc:
-                    self.save(self.model, config.model_save_path)
+                    self.save(config.model_save_path)
                     best_acc = now_acc
                 print('Accuracy of the network on the dev data: {} %'.format(100 * correct / total))
         logger.info('{} best with para lr {}, bs {}, the accuracy is {} %'.format(config.model_load_path, config.learning_rate, config.batch_size, best_acc))
     
     def test(self, test_loader):
-        best_acc = 0
+        self.best_model = self.load(self.config.model_save_path)
+        self.best_model.to(device)
         with torch.no_grad():
-            self.model.eval()
+            self.best_model.eval()
             correct = 0
             total = 0
+            model_result=[]
+            label_test=[]
             for i, batch in enumerate(test_loader):
                 input_ids = batch['input_ids'].squeeze(1).to(device)
                 attention_mask = batch['attention_mask'].squeeze(1).to(device)
                 labels = batch['label'].to(device)
-                outputs = self.model(input_ids, attention_mask)
+                outputs = self.best_model(input_ids, attention_mask)
                 _, predicted = torch.max(outputs[0].data, 1)
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
-
-            now_acc = 100 * correct / total
-            if now_acc > best_acc:
-                self.save(self.model, './data/teacher_model.pt')
-                best_acc = now_acc
+                model_result.extend(predicted.tolist())
+                label_test.extend(labels.tolist())
+        
+            real = list(map(lambda x:id2label[x], label_test))
+            pred = list(map(lambda x:id2label[x], model_result))
+            print(classification_report(real, pred,digits=5))
             print('Accuracy of the network on the dev data: {} %'.format(100 * correct / total))
-        logger.info('Model test accuracy is {} %'.format(best_acc))    
+        logger.info('Model test accuracy is {} %'.format(100 * correct / total))    
 
     def predict(self, data_loader):
         """
@@ -172,8 +181,11 @@ if __name__ == '__main__':
 
     config = parser.parse_args()
     logger = get_logger()
+        
+    login(token='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')
     
     os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
     device = torch.device('cuda:{}'.format(config.gpu) if torch.cuda.is_available() else 'cpu')
     
     train_loader, dev_loader, test_loader, id2label, label2id = parse_data(config)
@@ -184,5 +196,8 @@ if __name__ == '__main__':
 
     trainer = Trainer(config)
     trainer.train(train_loader, dev_loader)
+    trainer.test(test_loader)
     trainer.save(config.model_save_path)
+    
+    send_email("v100 machine finished.")
     
