@@ -1,5 +1,7 @@
 import os
 import argparse
+import time
+import pandas as pd
 import numpy as np
 
 from model import get_model
@@ -132,8 +134,8 @@ class Trainer:
     def load(self, path):
         return torch.load(path)
     
-    def save(self, model, path):
-        return torch.save(model, path)
+    def save(self, path):
+        return torch.save(self.model, path)
     
     
 if __name__ == '__main__':
@@ -143,7 +145,7 @@ if __name__ == '__main__':
                         help="model path load")
     parser.add_argument("-m", "--model_load_path", nargs='?', const=1, type=str, default="xlm-roberta-base",
                             help="model path load")
-    parser.add_argument("-s", "--model_save_path", nargs='?', const=1, type=str, default='data/model.pt',
+    parser.add_argument("-s", "--model_save_path", nargs='?', const=1, type=str, default='report/model.pt',
                             help="model path save")
     parser.add_argument("-len", "--length", nargs='?', const=1, type=int, default=32,
                             help="train sentence length")
@@ -182,4 +184,5 @@ if __name__ == '__main__':
 
     trainer = Trainer(config)
     trainer.train(train_loader, dev_loader)
+    trainer.save(config.model_save_path)
     
